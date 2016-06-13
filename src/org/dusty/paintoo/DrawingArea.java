@@ -1,81 +1,64 @@
 package org.dusty.paintoo;
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JComponent;
 
-public class DrawingArea extends JComponent {
-  private Image image;
-  private Graphics2D graphics;
+import org.dusty.paintoo.PainToo.Tool;
+import org.dusty.paintoo.PaintCursor.Cursors;
+
+public class DrawingArea extends Layer {
   
-  private int newX, newY, oldX, oldY;
-  
-  Toolkit toolkit = Toolkit.getDefaultToolkit();
-  Cursor cursor_zoom = toolkit.createCustomCursor(toolkit.getImage("assets/cursors/cursor_crosszoom.png"), new Point(0, 0),"zoom");
-  Cursor cursor_eyedrop = toolkit.createCustomCursor(toolkit.getImage("assets/cursors/cursor_eyedrop.png"), new Point(0, 31),"eyedrop");
-  Cursor cursor_pencil = toolkit.createCustomCursor(toolkit.getImage("assets/cursors/cursor_pencil.png"), new Point(1, 31),"pencil");
-  Cursor cursor_linecross = toolkit.createCustomCursor(toolkit.getImage("assets/cursors/cursor_linecross.png"), new Point(15, 15),"linecross");
-  Cursor cursor_crosshair = toolkit.createCustomCursor(toolkit.getImage("assets/cursors/cursor_crosshair.png"), new Point(15, 15),"crosshair");
-  
-  Cursor cursor;
-  
-  public DrawingArea() {
-    
-    cursor = cursor_crosshair;
-    
-    setDoubleBuffered(false);
+  public DrawingArea(PainToo paint) {
+    super(paint);
+    this.isDrawingArea = true;
+
+    /*
     addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
-        if (graphics != null) {
-          graphics.drawLine(e.getX(),e.getY(),e.getX(),e.getY());
-          repaint();
+        if (paint.getTool() == Tool.ZOOM) {
+          paint.defaultTool();
+        } else {
+          int mx = e.getX()/zoomScale;
+          int my = e.getY()/zoomScale;
+          if (graphics != null) {
+            drawLine(mx,my,mx,my);
+          }
+          oldX = mx;
+          oldY = my;
         }
-        oldX = e.getX();
-        oldY = e.getY();
       }
     });
 
     addMouseMotionListener(new MouseMotionAdapter() {
       public void mouseDragged(MouseEvent e) {
-        newX = e.getX();
-        newY = e.getY();
+        if (paint.getTool() != Tool.ZOOM) {
+          newX = e.getX()/zoomScale;
+          newY = e.getY()/zoomScale;
 
-        if (graphics != null) {
-          graphics.drawLine(oldX, oldY, newX, newY);
-          repaint();
-          oldX = newX;
-          oldY = newY;
+          if (graphics != null) {
+            drawLine(oldX, oldY, newX, newY);
+            oldX = newX;
+            oldY = newY;
+          }
         }
       }
     });
+    */
     
-    super.setCursor(cursor);
+    super.setPreferredSize(dimension);
   }
-  
-  protected void paintComponent(Graphics g) {
-    if (image == null) {
-      image = createImage(getSize().width, getSize().height);
-      graphics = (Graphics2D) image.getGraphics();
-      graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-      clearCanvas();
-    }
-
-    g.drawImage(image, 0, 0, null);
-  }
-  
-  public void clearCanvas() {
-    graphics.setPaint(Color.white);
-    graphics.fillRect(0, 0, getSize().width, getSize().height);
-    graphics.setPaint(Color.black);
-    repaint();
-  }
+ 
 }
