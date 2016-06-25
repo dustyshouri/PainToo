@@ -9,26 +9,28 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class PaintCursor {
-  private Cursor cursors[] = new Cursor[5];
   private String cursor_images[] = {
     "cursor_crosshair.png",
     "cursor_zoom.png",
     "cursor_eyedrop.png",
     "cursor_linecross.png",
     "cursor_pencil.png",
+    "cursor_bucketfill.png",
   };
+  private Cursor cursors[] = new Cursor[cursor_images.length];
   private Point cursor_points[] = {
       new Point(15, 15), // Crosshair
       new Point( 4,  4), // Zoom
       new Point( 0, 31), // Eyedrop
       new Point(15, 15), // Line Cross
       new Point( 1, 31), // Pencil
+      new Point( 1, 31), // Pencil
   };
   
   Toolkit toolkit = Toolkit.getDefaultToolkit();
   
   public static enum Cursors {
-    CROSSHAIR, ZOOM, EYEDROP, LINECROSS, PENCIL
+    CROSSHAIR, ZOOM, EYEDROP, LINECROSS, PENCIL, BUCKETFILL
   }
   
   public PaintCursor() {

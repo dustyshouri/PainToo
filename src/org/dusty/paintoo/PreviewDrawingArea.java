@@ -25,7 +25,7 @@ public class PreviewDrawingArea extends Layer {
   public PreviewDrawingArea(PainToo paint) {
     super(paint);
     isPreviewArea = true;
-
+    
     /*
     addMouseMotionListener(new MouseMotionAdapter() {
       public void mouseMoved(MouseEvent e) {

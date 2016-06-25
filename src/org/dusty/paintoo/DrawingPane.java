@@ -20,7 +20,7 @@ import org.dusty.paintoo.PaintCursor.Cursors;
 
 public class DrawingPane extends JLayeredPane {
   private int zoomScale = 1;
-  private Dimension dimension = new Dimension(640,480);
+  public Dimension dimension = PainToo.dimension;
   public PaintCursor cursor = new PaintCursor();
   
   public BufferedImage graphics;
@@ -32,6 +32,8 @@ public class DrawingPane extends JLayeredPane {
     
     addMouseListener(new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
+        int mx = e.getX()/zoomScale;
+        int my = e.getY()/zoomScale;
         switch (paint.getTool()) {
           case ZOOM:
             if (zoomScale > 1) zoomCanvas(1);
@@ -39,14 +41,15 @@ public class DrawingPane extends JLayeredPane {
             paint.defaultTool();
           break;
           
-          default:
-            int mx = e.getX()/zoomScale;
-            int my = e.getY()/zoomScale;
+          case BUCKETFILL:
+            bucketFill(Color.red,mx,my);
+          break;
+          case BRUSH:
             drawLine(Color.black,mx,my,mx,my);
-            oldX = mx;
-            oldY = my;
           break;
         }
+        oldX = mx;
+        oldY = my;
       }
       public void mouseExited(MouseEvent e) {
         System.out.println("Exited");
@@ -58,21 +61,22 @@ public class DrawingPane extends JLayeredPane {
 
     addMouseMotionListener(new MouseMotionAdapter() {
       public void mouseDragged(MouseEvent e) {
-        if (paint.getTool() != Tool.ZOOM) {
-          newX = e.getX()/zoomScale;
-          newY = e.getY()/zoomScale;
-
-          drawLine(Color.black, oldX, oldY, newX, newY);
-          oldX = newX;
-          oldY = newY;
+        int mx = e.getX()/zoomScale;
+        int my = e.getY()/zoomScale;
+        if (paint.getTool() == Tool.BRUSH) {
+          drawLine(Color.black, oldX, oldY, mx, my);
+          oldX = mx;
+          oldY = my;
         }
       }
       
       public void mouseMoved(MouseEvent e) {
-        int mx = e.getX()/zoomScale;
-        int my = e.getY()/zoomScale;
+        if (paint.getTool() == Tool.BRUSH) {
+          int mx = e.getX()/zoomScale;
+          int my = e.getY()/zoomScale;
         
-        previewPixel(mx, my);
+          previewPixel(mx, my);
+        }
       }
     });
     
@@ -113,11 +117,22 @@ public class DrawingPane extends JLayeredPane {
     for (Component c : super.getComponents()) {
       Layer panel = (Layer) c;
       if (panel.isDrawingArea) {
-        panel.drawLine(Color.black, x, y, x2, y2);
+        panel.drawLine(color, x, y, x2, y2);
         break;
       }
     }
   }
+  
+  public void bucketFill(Color color, int x, int y) {
+    for (Component c : super.getComponents()) {
+      Layer panel = (Layer) c;
+      if (panel.isDrawingArea) {
+        panel.bucketFill(color, x, y);
+        break;
+      }
+    }
+  }
+  
   
   public void zoomCanvas(int scale) {
     zoomScale = scale;
@@ -150,4 +165,5 @@ public class DrawingPane extends JLayeredPane {
     Cursor c = cursor.getCursor(i);
     super.setCursor(c);
   }
+ 
 }
