@@ -29,6 +29,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 
 import javax.swing.SwingConstants;
@@ -51,7 +53,7 @@ import java.awt.event.MouseEvent;
  */
 
 public class PainToo {
-  private JFrame frame;
+  public static JFrame frame;
   private ColorPicker colorPicker;
   DrawingArea drawingArea;
   PreviewDrawingArea previewDrawingArea;
@@ -99,10 +101,10 @@ public class PainToo {
         try {
           PainToo window = new PainToo();
           //window.frame.setIconImage(Toolkit.getDefaultToolkit().getImage("assets/favico.png"));
-          window.frame.setIconImage(new ImageIcon(getClass().getResource("/assets/favico.png")).getImage());
-          window.frame.setTitle("untitled - Paint");
-          window.frame.setVisible(true);
-          window.frame.setMinimumSize(new Dimension(500,400));
+          PainToo.frame.setIconImage(new ImageIcon(getClass().getResource("/assets/favico.png")).getImage());
+          PainToo.frame.setTitle("untitled - Paint");
+          PainToo.frame.setVisible(true);
+          PainToo.frame.setMinimumSize(new Dimension(500,400));
           
         } catch (Exception e) {
           e.printStackTrace();
@@ -149,6 +151,23 @@ public class PainToo {
         }
       }
     }
+    
+    frame.addKeyListener(new KeyAdapter() {
+      public void keyPressed(KeyEvent e) {
+        int mod = e.getModifiers();
+        int key = e.getKeyCode();
+        if (key != 17) {
+          if (mod == 2) {
+            // '-' is pressed while holding ctrl
+            if (key == 45 || key == 109) {
+              drawingPane.decreaseBrushSize();
+            } else if (key == 61 || key == 107) {
+              drawingPane.increaseBrushSize();
+            }
+          }
+        }
+      }
+    });
     
     frame.getContentPane().setLayout(new BorderLayout(0, 0));
     

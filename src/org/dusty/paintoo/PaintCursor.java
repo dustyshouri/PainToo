@@ -20,7 +20,7 @@ public class PaintCursor {
   private Cursor cursors[] = new Cursor[cursor_images.length];
   private Point cursor_points[] = {
       new Point(15, 15), // Crosshair
-      new Point( 4,  4), // Zoom
+      new Point( 7,  7), // Zoom
       new Point( 0, 31), // Eyedrop
       new Point(15, 15), // Line Cross
       new Point( 1, 31), // Pencil

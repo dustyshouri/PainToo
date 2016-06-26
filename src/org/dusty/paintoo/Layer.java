@@ -1,14 +1,17 @@
 package org.dusty.paintoo;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
@@ -49,11 +52,66 @@ class Layer extends JComponent {
     return this.zoomScale;
   }
   
+  public void drawBrush(Color color, int x, int y, int radius) {
+    Graphics2D g = graphics.createGraphics();
+
+    Color oldColor = g.getColor();
+    g.setColor(color);
+    if (radius%2 == 0) {
+      x--;
+      y--;
+    }
+    if (radius == 2) g.drawRect(x,y,1,1);
+    else {
+      radius--;
+      g.fillOval(x -  radius/2, y -  radius/2, radius, radius);
+      g.drawOval(x -  radius/2, y -  radius/2, radius, radius);
+    }
+    repaint();
+    g.dispose();
+    
+    g.setColor(oldColor);
+  }
+  
+  public void drawBrushLine(Color color, int x, int y, int x2, int y2, int radius) {
+    Graphics2D g = graphics.createGraphics();
+
+    Stroke defaultStroke = g.getStroke();
+    Color oldColor = g.getColor();
+    g.setColor(color);
+    
+    float dx = x2 - x;
+    float dy = y2 - y;
+    float dist = (int) Math.sqrt(dx*dx+dy*dy);
+    int strokeRadius = radius;
+
+    if (radius < 6) {
+      for (int i=0;i<(int)dist;i++) {
+        int drawx = (int) (x + (dx/dist)*i);
+        int drawy = (int) (y + (dy/dist)*i);
+        drawBrush(color,drawx,drawy,radius);
+      }
+    } else {
+      g.setStroke(new BasicStroke(strokeRadius,BasicStroke.CAP_ROUND,BasicStroke.JOIN_BEVEL));
+      g.drawLine(x, y, x2, y2);
+    }
+    g.setStroke(defaultStroke);
+    g.setColor(color);
+    drawBrush(color,x , y , radius);
+    drawBrush(color,x2, y2, radius);
+    
+    repaint();
+    g.dispose();
+    
+    g.setColor(oldColor);
+  }
+  
   public void drawLine(Color color, int x, int y, int x2, int y2) {
     Graphics2D g = graphics.createGraphics();
 
     Color oldColor = g.getColor();
     g.setColor(color);
+
     g.drawLine(x, y, x2, y2);
     repaint();
     g.dispose();
@@ -92,6 +150,7 @@ class Layer extends JComponent {
     stack.push(new Point(mx, my));
 
     Color fill = new Color((int)(Math.random()*255),(int)(Math.random()*255),(int)(Math.random()*255),55+(int)(Math.random()*200));
+    //fill = new Color(255, 255, 255, 255);
     
     long timeStart = System.currentTimeMillis();
     while (!stack.isEmpty()) {
@@ -168,7 +227,9 @@ class Layer extends JComponent {
     rgba += (((int) pixels[pixelOffset + 1] & 0xff) << 8); // green
     rgba += (((int) pixels[pixelOffset + 2] & 0xff) << 16); // red
     */
-}
+  }
+  
+  public void previewZoom(BufferedImage drawingGraphics, int x, int y, int w, int h) {}
   
   public void zoomCanvas(int scale) {
     this.zoomScale = scale;

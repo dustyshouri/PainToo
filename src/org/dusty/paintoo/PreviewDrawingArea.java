@@ -54,6 +54,49 @@ public class PreviewDrawingArea extends Layer {
     g.fillRect(0, 0, graphics.getWidth(), graphics.getHeight());
     
     g.setColor(oldColor);
+    repaint();
+    g.dispose();
+  }
+  
+  @Override
+  public void previewZoom(BufferedImage drawingGraphics, int x, int y, int w, int h) {
+    Graphics2D g = graphics.createGraphics();
+    clearCanvas();
+    
+    if (x - w/2 < 0) x = w/2;
+    else if (x + w/2 > graphics.getWidth()) x = graphics.getWidth() - w/2 - 1;
+    if (y - h/2 < 0) y = h/2;
+    else if (y + h/2 > graphics.getHeight()) y = graphics.getHeight() - h/2 - 1;
+
+    int dx  = x-w/2;
+    int dx2 = x+w/2;
+    int dy  = y-h/2;
+    int dy2 = y+h/2;
+    //graphics.setRGB(x, y, getInvertedColor(graphics.getRGB(x, y)));
+
+    for (int i=0;i<w;i++) graphics.setRGB(dx+i, dy, getInvertedColor(drawingGraphics.getRGB(dx+i,dy)));
+    for (int i=0;i<w;i++) graphics.setRGB(dx+i, dy2, getInvertedColor(drawingGraphics.getRGB(dx+i,dy2)));
+    for (int i=0;i<h;i++) graphics.setRGB(dx, dy+i, getInvertedColor(drawingGraphics.getRGB(dx,dy+i)));
+    for (int i=0;i<h;i++) graphics.setRGB(dx2, dy+i, getInvertedColor(drawingGraphics.getRGB(dx2,dy+i)));
+
+    //g.drawLine(dx,dy,dx2,dy);
+    //g.drawLine(dx,dy,dx,dy2);
+    //g.drawLine(dx2,dy,dx2,dy2);
+    //g.drawLine(dx,dy2,dx2,dy2);
+    repaint();
+    g.dispose();
+  }
+  
+  private int getInvertedColor(int rgb) {
+    int a = 0xFF & (rgb >> 24);
+    if (a == 0) return 0xFFFF00FF;
+    return (0xFFFFFF - rgb) | 0xFF000000;
+  }
+  
+  @Override
+  public void drawBrush(Color color, int x, int y, int radius) {
+    clearCanvas();
+    super.drawBrush(color, x, y, radius);
   }
   
   @Override
@@ -62,10 +105,7 @@ public class PreviewDrawingArea extends Layer {
 
     Color oldColor = g.getColor();
     
-    g.setPaint(new Color(255, 0, 255, 0));
-    g.setBackground(new Color(255, 0, 255, 0));
-    g.clearRect(0, 0, graphics.getWidth(), graphics.getHeight());
-    g.fillRect(0, 0, graphics.getWidth(), graphics.getHeight());
+    clearCanvas();
     
     g.setColor(color);
     g.drawLine(x, y, x2, y2);
