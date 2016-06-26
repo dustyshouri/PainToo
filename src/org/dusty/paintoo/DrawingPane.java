@@ -173,6 +173,11 @@ public class DrawingPane extends JLayeredPane {
     panel.previewZoom(graphics, x,y,w,h);
   }
   
+  public void previewPixel() {
+    Layer panel = getPreviewLayer();
+    panel.drawBrush(fgColor, newX, newY, brushSize);
+  }
+  
   public void previewPixel(Color color, int radius, int mx, int my) {
     Layer panel = getPreviewLayer();
     panel.drawBrush(color, mx, my, radius);

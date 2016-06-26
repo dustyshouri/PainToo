@@ -184,6 +184,9 @@ public class PainToo {
               Image img = getImageFromClipboard();
               if (img != null) drawingPane.pasteClipboard(img);
             }
+          } else {
+            if (key == 66) changeTool(Tool.BRUSH);
+            else if (key == 71) changeTool(Tool.BUCKETFILL);
           }
         }
       }
@@ -325,6 +328,8 @@ public class PainToo {
       btn.setFocusable(false);
     }
     buttons[selectedTool.ordinal()].setSelected(true);
+    drawingPane.clearPreview();
+    drawingPane.previewPixel();
   }
   
   public Image getImageFromClipboard() {
