@@ -144,8 +144,11 @@ class Layer extends JComponent {
     int w = graphics.getWidth();
     int h = graphics.getHeight();
     
+    /*
     System.out.println(new Color(graphics.getRGB(mx,my)) + " : " + color);
+    System.out.println(new Color(graphics.getRGB(mx,my)).getAlpha() + " : " + color.getAlpha());
     if (new Color(graphics.getRGB(mx,my)).equals(color)) return;
+    */
     
     DataBuffer d = graphics.getRaster().getDataBuffer();
     byte[] pixels = ((DataBufferByte)d).getData();
@@ -153,6 +156,9 @@ class Layer extends JComponent {
     alphaValue = pixels.length/(w*h) > 3;
     
     int clickcolor = getPixelData(pixels, mx, my);
+    
+    System.out.println(clickcolor + " : " + color.getRGB());
+    if (clickcolor == color.getRGB()) return;
 
     ArrayDeque<Point> stack = new ArrayDeque<Point>();
     currentlyFilling = true;
