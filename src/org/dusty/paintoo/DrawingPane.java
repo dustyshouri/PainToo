@@ -1,5 +1,6 @@
 package org.dusty.paintoo;
 
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -8,7 +9,10 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -23,26 +27,34 @@ import org.dusty.paintoo.PainToo.Tool;
 import org.dusty.paintoo.PaintCursor.Cursors;
 
 public class DrawingPane extends JLayeredPane {
-  private int zoomScale = 1;
-  private int desiredZoom = 12;
-  private int brushSize = 1;
+  private int zoomScale = 1, brushSize = 1, desiredZoom = 12;
   Color bgColor = new Color(255,255,255,255);
   Color fgColor = new Color(0,0,0,255);
   public Dimension dimension = PainToo.dimension;
+  private Point mousePosition;
   public PaintCursor cursor = new PaintCursor();
   public PainToo paint;
   
   public BufferedImage graphics;
-  public int newX, newY, oldX, oldY;
+  public int newX, newY, oldX, oldY, startX, startY;
   Color paintColor = fgColor;
   
-  public DrawingPane(PainToo p) {
-    paint = p;
+  public enum dir {UP, DOWN, LEFT, RIGHT}
+  private dir stickDir;
+  Robot robot;
+  
+  public DrawingPane(PainToo paint) {
+    this.paint = paint;
     setLayout(new GridBagLayout());
     setPreferredSize(new Dimension(640,480));
     
+    try {
+      robot = new Robot();
+    } catch (AWTException e) {}
+    
     addMouseListener(new MouseAdapter() {
       public void mouseReleased(MouseEvent e) {
+        stickDir = null;
         newX = e.getX()/zoomScale;
         newY = e.getY()/zoomScale;
         paintColor = fgColor;
@@ -52,6 +64,13 @@ public class DrawingPane extends JLayeredPane {
         paintColor = e.getButton() == 1 ? fgColor : bgColor;
         int mx = e.getX()/zoomScale;
         int my = e.getY()/zoomScale;
+        
+        if (paint.shiftHeld) {
+          startX = mx;
+          startY = my;
+          stickDir = null;
+          mousePosition = MouseInfo.getPointerInfo().getLocation();
+        }
 
         switch (paint.getTool()) {
           case ZOOM:
@@ -87,6 +106,30 @@ public class DrawingPane extends JLayeredPane {
         int mx = e.getX()/zoomScale;
         int my = e.getY()/zoomScale;
         if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) {
+          
+          if (paint.shiftHeld) {
+            if (stickDir == null) {
+              if (startX < mx) stickDir = dir.LEFT;
+              else if (startY < my) stickDir = dir.UP;
+              else if (startX > mx) stickDir = dir.RIGHT;
+              else if (startY > my) stickDir = dir.DOWN;
+            }
+          } else {
+            startX = mx;
+            startY = my;
+          }
+          
+          if (stickDir == dir.LEFT || stickDir == dir.RIGHT) {
+            int mousex = MouseInfo.getPointerInfo().getLocation().x;
+            robot.mouseMove(mousex,mousePosition.y);
+            my = startY;
+          }
+          else if (stickDir == dir.UP || stickDir == dir.DOWN) {
+            int mousey = MouseInfo.getPointerInfo().getLocation().y;
+            robot.mouseMove(mousePosition.x,mousey);
+            mx = startX;
+          }
+          
           drawBrush(paintColor, brushSize, oldX, oldY, mx, my);
           oldX = mx;
           oldY = my;
@@ -113,6 +156,7 @@ public class DrawingPane extends JLayeredPane {
   
   public void increaseBrushSize() {
     brushSize++;
+    System.out.println(paint.getTool());
     if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) previewPixel(paintColor,brushSize,newX,newY);
   }
   

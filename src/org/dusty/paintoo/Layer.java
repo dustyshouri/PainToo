@@ -57,6 +57,7 @@ class Layer extends JComponent {
   }
   
   public void drawBrush(Color color, int x, int y, int radius) {
+
     Graphics2D g = graphics.createGraphics();
 
     Color oldColor = g.getColor();

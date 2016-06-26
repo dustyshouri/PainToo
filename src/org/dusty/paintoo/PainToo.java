@@ -68,6 +68,7 @@ public class PainToo {
   DrawingPane drawingPane;
   public static Dimension dimension = new Dimension(1000,600);
   public Tool selectedTool;
+  public boolean shiftHeld = false;
   
   public enum Tool {
     FREEFORM, SELECT, ERASE, BUCKETFILL, EYEDROP, ZOOM, PENCIL, BRUSH, 
@@ -161,11 +162,18 @@ public class PainToo {
     }
     
     frame.addKeyListener(new KeyAdapter() {
+      public void keyReleased(KeyEvent e) {
+        int mod = e.getModifiers();
+        int key = e.getKeyCode();
+        shiftHeld = false;
+      }
       public void keyPressed(KeyEvent e) {
         int mod = e.getModifiers();
         int key = e.getKeyCode();
-        if (key != 17) {
-          System.out.println("Key: " + key);
+        if (key == 16) shiftHeld = true;
+        else shiftHeld = false;
+        if (key != 17 && key != 16) {
+          System.out.println("Key pressed: " + key + " - " + mod);
           if (mod == 2) {
             // '-' is pressed while holding ctrl
             if (key == 45 || key == 109) {
