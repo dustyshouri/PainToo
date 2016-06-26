@@ -32,6 +32,7 @@ class Layer extends JComponent {
   //public Dimension dimension = new Dimension(32,32);
   public int newX, newY, oldX, oldY;
   private boolean alphaValue;
+  private boolean currentlyFilling = false;
   
   public Layer(PainToo paint) {
     graphics = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -106,6 +107,14 @@ class Layer extends JComponent {
     g.setColor(oldColor);
   }
   
+  public void pasteClipboard(Image img, int x, int y) {
+    Graphics2D g = graphics.createGraphics();
+    g.drawImage(img, x, y, null);
+    repaint();
+    g.dispose();
+  }
+  
+  
   public void drawLine(Color color, int x, int y, int x2, int y2) {
     Graphics2D g = graphics.createGraphics();
 
@@ -114,9 +123,8 @@ class Layer extends JComponent {
 
     g.drawLine(x, y, x2, y2);
     repaint();
-    g.dispose();
-    
     g.setColor(oldColor);
+    g.dispose();
   }
   
   public void drawLine(int x, int y, int x2, int y2) {
@@ -129,13 +137,15 @@ class Layer extends JComponent {
   }
   
   public void bucketFill(Color color, int mx, int my) {
+    if (currentlyFilling) return;
     Graphics2D g = graphics.createGraphics();
   
     g.setColor(color);
     int w = graphics.getWidth();
     int h = graphics.getHeight();
-
-    //if (this.clickcolor == this.fillcolor.getRGB()) return;
+    
+    System.out.println(new Color(graphics.getRGB(mx,my)) + " : " + color);
+    if (new Color(graphics.getRGB(mx,my)).equals(color)) return;
     
     DataBuffer d = graphics.getRaster().getDataBuffer();
     byte[] pixels = ((DataBufferByte)d).getData();
@@ -145,11 +155,12 @@ class Layer extends JComponent {
     int clickcolor = getPixelData(pixels, mx, my);
 
     ArrayDeque<Point> stack = new ArrayDeque<Point>();
+    currentlyFilling = true;
     
     stack.clear();
     stack.push(new Point(mx, my));
 
-    Color fill = new Color((int)(Math.random()*255),(int)(Math.random()*255),(int)(Math.random()*255),55+(int)(Math.random()*200));
+    //Color fill = new Color((int)(Math.random()*255),(int)(Math.random()*255),(int)(Math.random()*255),55+(int)(Math.random()*200));
     //fill = new Color(255, 255, 255, 255);
     
     long timeStart = System.currentTimeMillis();
@@ -165,7 +176,7 @@ class Layer extends JComponent {
       boolean spanLeft = false;
       
       while (y1 < h && getPixelData(pixels, x, y1) == clickcolor) {
-        setDataPixel(pixels, fill, x, y1);
+        setDataPixel(pixels, color, x, y1);
         if (!spanLeft && x > 0 && getPixelData(pixels, x - 1, y1) == clickcolor) {
           stack.push(new Point(x - 1, y1));
           spanLeft = true;
@@ -179,6 +190,7 @@ class Layer extends JComponent {
     }
     
     long timePassed = (System.currentTimeMillis() - timeStart);
+    currentlyFilling = false;
     System.out.println(w + "*" + h + " pixels filled in " + timePassed + " milliseconds");
     this.repaint();
     g.dispose();

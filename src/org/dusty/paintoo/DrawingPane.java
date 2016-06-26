@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -24,13 +25,16 @@ import org.dusty.paintoo.PaintCursor.Cursors;
 public class DrawingPane extends JLayeredPane {
   private int zoomScale = 1;
   private int desiredZoom = 12;
-  private int brushSize = 7;
+  private int brushSize = 1;
+  Color bgColor = new Color(255,255,255,255);
+  Color fgColor = new Color(0,0,0,255);
   public Dimension dimension = PainToo.dimension;
   public PaintCursor cursor = new PaintCursor();
   public PainToo paint;
   
   public BufferedImage graphics;
   public int newX, newY, oldX, oldY;
+  Color paintColor = fgColor;
   
   public DrawingPane(PainToo p) {
     paint = p;
@@ -41,10 +45,14 @@ public class DrawingPane extends JLayeredPane {
       public void mouseReleased(MouseEvent e) {
         newX = e.getX()/zoomScale;
         newY = e.getY()/zoomScale;
+        paintColor = fgColor;
+        if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize, newX, newY);
       }
       public void mousePressed(MouseEvent e) {
+        paintColor = e.getButton() == 1 ? fgColor : bgColor;
         int mx = e.getX()/zoomScale;
         int my = e.getY()/zoomScale;
+
         switch (paint.getTool()) {
           case ZOOM:
             if (zoomScale > 1) zoomCanvas(1);
@@ -53,10 +61,11 @@ public class DrawingPane extends JLayeredPane {
           break;
           
           case BUCKETFILL:
-            bucketFill(Color.red,mx,my);
+            bucketFill(paintColor,mx,my);
           break;
           case BRUSH:
-            drawBrush(Color.black,brushSize,mx,my);
+            previewPixel(paintColor,brushSize,mx, my);
+            drawBrush(paintColor,brushSize,mx,my);
           break;
           default:
           break;
@@ -77,7 +86,7 @@ public class DrawingPane extends JLayeredPane {
         int mx = e.getX()/zoomScale;
         int my = e.getY()/zoomScale;
         if (paint.getTool() == Tool.BRUSH) {
-          drawBrush(Color.black, brushSize, oldX, oldY, mx, my);
+          drawBrush(paintColor, brushSize, oldX, oldY, mx, my);
           oldX = mx;
           oldY = my;
         }
@@ -88,7 +97,7 @@ public class DrawingPane extends JLayeredPane {
         int my = e.getY()/zoomScale;
         newX = mx;
         newY = my;
-        if (paint.getTool() == Tool.BRUSH) previewPixel(Color.black,brushSize,mx, my);
+        if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,mx, my);
         else if (paint.getTool() == Tool.ZOOM && zoomScale == 1) previewZoom(e.getX(), e.getY());
       }
     });
@@ -103,12 +112,12 @@ public class DrawingPane extends JLayeredPane {
   
   public void increaseBrushSize() {
     brushSize++;
-    if (paint.getTool() == Tool.BRUSH) previewPixel(Color.black,brushSize,newX,newY);
+    if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,newX,newY);
   }
   
   public void decreaseBrushSize() {
     brushSize = Math.max(1,brushSize - 1);
-    if (paint.getTool() == Tool.BRUSH) previewPixel(Color.black,brushSize,newX,newY);
+    if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,newX,newY);
   }
   
   public void previewZoom(int x, int y) {
@@ -126,7 +135,7 @@ public class DrawingPane extends JLayeredPane {
   
   public void previewPixel(int mx, int my) {
     Layer panel = getPreviewLayer();
-    panel.drawLine(Color.black, mx, my, mx, my);
+    panel.drawLine(paintColor, mx, my, mx, my);
   }
   
   public void drawBrush(Color color, int radius, int x, int y, int x2, int y2) {
@@ -155,8 +164,16 @@ public class DrawingPane extends JLayeredPane {
     panel.bucketFill(color, x, y);
   }
   
+  public void pasteClipboard(Image img) {
+    Layer panel = getCurrentLayer();
+    int x = Math.max(0,newX-img.getWidth(null)/2);
+    int y = Math.max(0,newY-img.getHeight(null)/2);
+    panel.pasteClipboard(img,x,y);
+  }
+  
   public void zoomCanvas(int scale) {
     clearPreview();
+    
     zoomScale = scale;
     System.out.println("Scale set to: " + scale);
     for (Component c : super.getComponents()) {
@@ -165,6 +182,14 @@ public class DrawingPane extends JLayeredPane {
     }
     super.setPreferredSize(new Dimension(dimension.width*scale,dimension.height*scale));
     super.revalidate();
+    
+    /*
+    if (scale > 1) {
+      Rectangle bounds = new Rectangle(newX*zoomScale, newY*zoomScale,1,1);
+      super.scrollRectToVisible(bounds);
+    }
+    */
+
   }
 
   public void addLayer(JComponent layer) {

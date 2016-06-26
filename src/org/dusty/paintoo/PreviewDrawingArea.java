@@ -72,19 +72,20 @@ public class PreviewDrawingArea extends Layer {
     int dx2 = x+w/2;
     int dy  = y-h/2;
     int dy2 = y+h/2;
-    //graphics.setRGB(x, y, getInvertedColor(graphics.getRGB(x, y)));
 
-    for (int i=0;i<w;i++) graphics.setRGB(dx+i, dy, getInvertedColor(drawingGraphics.getRGB(dx+i,dy)));
-    for (int i=0;i<w;i++) graphics.setRGB(dx+i, dy2, getInvertedColor(drawingGraphics.getRGB(dx+i,dy2)));
-    for (int i=0;i<h;i++) graphics.setRGB(dx, dy+i, getInvertedColor(drawingGraphics.getRGB(dx,dy+i)));
-    for (int i=0;i<h;i++) graphics.setRGB(dx2, dy+i, getInvertedColor(drawingGraphics.getRGB(dx2,dy+i)));
+    for (int i=0;i<w;i++) drawInvertedPixel(drawingGraphics, dx+i, dy);
+    for (int i=0;i<w;i++) drawInvertedPixel(drawingGraphics, dx+i, dy2);
+    for (int i=0;i<h;i++) drawInvertedPixel(drawingGraphics, dx, dy+i);
+    for (int i=0;i<h;i++) drawInvertedPixel(drawingGraphics, dx2, dy+i);
 
-    //g.drawLine(dx,dy,dx2,dy);
-    //g.drawLine(dx,dy,dx,dy2);
-    //g.drawLine(dx2,dy,dx2,dy2);
-    //g.drawLine(dx,dy2,dx2,dy2);
     repaint();
     g.dispose();
+  }
+  
+  public void drawInvertedPixel(BufferedImage drawingGraphics, int x, int y) {
+    if (x < 0 || y < 0) return;
+    if (x >= drawingGraphics.getWidth() || y >= drawingGraphics.getHeight()) return;
+    graphics.setRGB(x, y, getInvertedColor(drawingGraphics.getRGB(x, y)));
   }
   
   private int getInvertedColor(int rgb) {
