@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import org.dusty.paintoo.PainToo.Tool;
 
 class Layer extends JComponent {
+  
   public boolean isDrawingArea = false, isPreviewArea = false;
   public Image image;
   public BufferedImage graphics;
@@ -33,8 +34,10 @@ class Layer extends JComponent {
   public int newX, newY, oldX, oldY;
   private boolean alphaValue;
   private boolean currentlyFilling = false;
+  PainToo paintoo;
   
   public Layer(PainToo paint) {
+    paintoo = paint;
     graphics = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_4BYTE_ABGR);
     setPreferredSize(dimension);
     //graphics.createGraphics().setComposite(AlphaComposite.Src);
@@ -64,9 +67,13 @@ class Layer extends JComponent {
     }
     if (radius == 2) g.drawRect(x,y,1,1);
     else {
-      radius--;
-      g.fillOval(x -  radius/2, y -  radius/2, radius, radius);
-      g.drawOval(x -  radius/2, y -  radius/2, radius, radius);
+      if (paintoo.getTool() == PainToo.Tool.PENCIL) {
+        g.fillRect(x -  radius/2, y -  radius/2, radius, radius);
+      } else {
+        radius--;
+        g.fillOval(x -  radius/2, y -  radius/2, radius, radius);
+        g.drawOval(x -  radius/2, y -  radius/2, radius, radius);
+      }
     }
     repaint();
     g.dispose();
@@ -86,7 +93,7 @@ class Layer extends JComponent {
     float dist = (int) Math.sqrt(dx*dx+dy*dy);
     int strokeRadius = radius;
 
-    if (radius < 6) {
+    if (radius < 6 || paintoo.getTool() == PainToo.Tool.PENCIL) {
       for (int i=0;i<(int)dist;i++) {
         int drawx = (int) (x + (dx/dist)*i);
         int drawy = (int) (y + (dy/dist)*i);
@@ -143,12 +150,6 @@ class Layer extends JComponent {
     g.setColor(color);
     int w = graphics.getWidth();
     int h = graphics.getHeight();
-    
-    /*
-    System.out.println(new Color(graphics.getRGB(mx,my)) + " : " + color);
-    System.out.println(new Color(graphics.getRGB(mx,my)).getAlpha() + " : " + color.getAlpha());
-    if (new Color(graphics.getRGB(mx,my)).equals(color)) return;
-    */
     
     DataBuffer d = graphics.getRaster().getDataBuffer();
     byte[] pixels = ((DataBufferByte)d).getData();

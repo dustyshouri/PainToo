@@ -63,6 +63,7 @@ public class DrawingPane extends JLayeredPane {
           case BUCKETFILL:
             bucketFill(paintColor,mx,my);
           break;
+          case PENCIL:
           case BRUSH:
             previewPixel(paintColor,brushSize,mx, my);
             drawBrush(paintColor,brushSize,mx,my);
@@ -85,7 +86,7 @@ public class DrawingPane extends JLayeredPane {
       public void mouseDragged(MouseEvent e) {
         int mx = e.getX()/zoomScale;
         int my = e.getY()/zoomScale;
-        if (paint.getTool() == Tool.BRUSH) {
+        if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) {
           drawBrush(paintColor, brushSize, oldX, oldY, mx, my);
           oldX = mx;
           oldY = my;
@@ -97,7 +98,7 @@ public class DrawingPane extends JLayeredPane {
         int my = e.getY()/zoomScale;
         newX = mx;
         newY = my;
-        if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,mx, my);
+        if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) previewPixel(paintColor,brushSize,mx, my);
         else if (paint.getTool() == Tool.ZOOM && zoomScale == 1) previewZoom(e.getX(), e.getY());
       }
     });
@@ -112,12 +113,12 @@ public class DrawingPane extends JLayeredPane {
   
   public void increaseBrushSize() {
     brushSize++;
-    if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,newX,newY);
+    if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) previewPixel(paintColor,brushSize,newX,newY);
   }
   
   public void decreaseBrushSize() {
     brushSize = Math.max(1,brushSize - 1);
-    if (paint.getTool() == Tool.BRUSH) previewPixel(paintColor,brushSize,newX,newY);
+    if (paint.getTool() == Tool.BRUSH || paint.getTool() == Tool.PENCIL) previewPixel(paintColor,brushSize,newX,newY);
   }
   
   public void previewZoom(int x, int y) {

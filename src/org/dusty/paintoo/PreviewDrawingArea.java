@@ -21,6 +21,7 @@ import org.dusty.paintoo.PainToo.Tool;
 import org.dusty.paintoo.PaintCursor.Cursors;
 
 public class PreviewDrawingArea extends Layer {
+  PainToo paintoo;
   
   public PreviewDrawingArea(PainToo paint) {
     super(paint);

@@ -6,12 +6,10 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
-
 import java.awt.BorderLayout;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -69,7 +67,7 @@ public class PainToo {
   Background background;
   DrawingPane drawingPane;
   public static Dimension dimension = new Dimension(1000,600);
-  Tool selectedTool;
+  public Tool selectedTool;
   
   public enum Tool {
     FREEFORM, SELECT, ERASE, BUCKETFILL, EYEDROP, ZOOM, PENCIL, BRUSH, 
@@ -248,6 +246,7 @@ public class PainToo {
           if (e.getActionCommand().equals("Zoom")) changeTool(Tool.ZOOM);
           else if (e.getActionCommand().equals("Bucket Fill")) changeTool(Tool.BUCKETFILL);
           else if (e.getActionCommand().equals("Brush")) changeTool(Tool.BRUSH);
+          else if (e.getActionCommand().equals("Pencil")) changeTool(Tool.PENCIL);
           else changeTool(null);
         }
       });
@@ -301,6 +300,9 @@ public class PainToo {
       case BUCKETFILL: 
         drawingPane.setCursor(PaintCursor.Cursors.BUCKETFILL);
         selectedTool = Tool.BUCKETFILL;
+      break;
+      case PENCIL: 
+        selectedTool = Tool.PENCIL;
       break;
       default: 
         defaultTool = true; 
