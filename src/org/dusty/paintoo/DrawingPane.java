@@ -5,32 +5,28 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Robot;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-
 import javax.swing.JComponent;
 import javax.swing.JLayeredPane;
 import org.dusty.paintoo.PainToo.Tool;
 import org.dusty.paintoo.PaintCursor.Cursors;
 
 public class DrawingPane extends JLayeredPane {
+  private static final long serialVersionUID = 1L;
+  
   private int zoomScale = 1, brushSize = 1, desiredZoom = 12;
   Color bgColor = new Color(255,255,255,255);
   Color fgColor = new Color(0,0,0,255);
-  public Dimension dimension = PainToo.dimension;
+  public Dimension dimension;
   private Point mousePosition;
   public PaintCursor cursor = new PaintCursor();
   public PainToo paint;
@@ -45,6 +41,7 @@ public class DrawingPane extends JLayeredPane {
   
   public DrawingPane(PainToo paint) {
     this.paint = paint;
+    this.dimension = paint.dimension;
     setLayout(new GridBagLayout());
     setPreferredSize(new Dimension(640,480));
     
@@ -168,8 +165,8 @@ public class DrawingPane extends JLayeredPane {
   public void previewZoom(int x, int y) {
     Layer panel = getPreviewLayer();
     BufferedImage graphics = getCurrentLayer().graphics;
-    int w = (PainToo.frame.getWidth()-89)/desiredZoom;
-    int h = (PainToo.frame.getHeight()-150)/desiredZoom;
+    int w = (paint.getWidth()-89)/desiredZoom;
+    int h = (paint.getHeight()-150)/desiredZoom;
     panel.previewZoom(graphics, x,y,w,h);
   }
   
