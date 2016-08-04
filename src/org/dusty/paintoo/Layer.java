@@ -1,6 +1,5 @@
 package org.dusty.paintoo;
 
-import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,35 +8,30 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Stroke;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
 import java.util.ArrayDeque;
-import java.awt.image.DataBufferInt;
-
 import javax.swing.JComponent;
 
-import org.dusty.paintoo.PainToo.Tool;
-
 class Layer extends JComponent {
+  private static final long serialVersionUID = 1L;
   
   public boolean isDrawingArea = false, isPreviewArea = false;
   public Image image;
   public BufferedImage graphics;
   public int zoomScale = 1;
   //public Dimension dimension = new Dimension(640*2,480*2);
-  public Dimension dimension = PainToo.dimension;
+  public Dimension dimension;
   //public Dimension dimension = new Dimension(32,32);
   public int newX, newY, oldX, oldY;
   private boolean alphaValue;
   private boolean currentlyFilling = false;
-  PainToo paintoo;
+  private PainToo paint;
   
   public Layer(PainToo paint) {
-    paintoo = paint;
+    this.paint = paint;
+    this.dimension = paint.dimension;
     graphics = new BufferedImage(dimension.width, dimension.height, BufferedImage.TYPE_4BYTE_ABGR);
     setPreferredSize(dimension);
     //graphics.createGraphics().setComposite(AlphaComposite.Src);
@@ -68,7 +62,7 @@ class Layer extends JComponent {
     }
     if (radius == 2) g.drawRect(x,y,1,1);
     else {
-      if (paintoo.getTool() == PainToo.Tool.PENCIL) {
+      if (paint.getTool() == PainToo.Tool.PENCIL) {
         g.fillRect(x -  radius/2, y -  radius/2, radius, radius);
       } else {
         radius--;
@@ -94,7 +88,7 @@ class Layer extends JComponent {
     float dist = (int) Math.sqrt(dx*dx+dy*dy);
     int strokeRadius = radius;
 
-    if (radius < 6 || paintoo.getTool() == PainToo.Tool.PENCIL) {
+    if (radius < 6 || paint.getTool() == PainToo.Tool.PENCIL) {
       for (int i=0;i<(int)dist;i++) {
         int drawx = (int) (x + (dx/dist)*i);
         int drawy = (int) (y + (dy/dist)*i);
