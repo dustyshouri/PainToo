@@ -5,11 +5,10 @@ import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
+
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import java.awt.BorderLayout;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
@@ -20,7 +19,6 @@ import javax.swing.JScrollPane;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import java.awt.Color;
@@ -29,20 +27,12 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Toolkit;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.event.MouseEvent;
 @SuppressWarnings("unused")
@@ -59,16 +49,12 @@ import java.awt.event.MouseEvent;
  */
 
 public class PainToo {
-  public static JFrame frame;
-  public static JScrollPane scrollPane;
-  private ColorPicker colorPicker;
+  private JFrame frame;
   DrawingArea drawingArea;
   PreviewDrawingArea previewDrawingArea;
   Background background;
   DrawingPane drawingPane;
-  public static Dimension dimension = new Dimension(1000,600);
-  public Tool selectedTool;
-  public boolean shiftHeld = false;
+  Tool selectedTool;
   
   public enum Tool {
     FREEFORM, SELECT, ERASE, BUCKETFILL, EYEDROP, ZOOM, PENCIL, BRUSH, 
@@ -109,12 +95,10 @@ public class PainToo {
         try {
           PainToo window = new PainToo();
           //window.frame.setIconImage(Toolkit.getDefaultToolkit().getImage("assets/favico.png"));
-          PainToo.frame.setIconImage(new ImageIcon(getClass().getResource("/assets/favico.png")).getImage());
-          PainToo.frame.setTitle("untitled - Paint");
-          PainToo.frame.setVisible(true);
-          PainToo.frame.setMinimumSize(new Dimension(500,400));
-          //PainToo.frame.setExtendedState(PainToo.frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
-          
+          window.frame.setIconImage(new ImageIcon(getClass().getResource("/assets/favico.png")).getImage());
+          window.frame.setTitle("untitled - Paint");
+          window.frame.setVisible(true);
+          window.frame.setMinimumSize(new Dimension(500,400));
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -131,8 +115,6 @@ public class PainToo {
     frame.setBounds(100, 100, 1280/2, 840/2);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     
-    //colorPicker.setIconImage(new ImageIcon(getClass().getResource("/assets/favico.png")).getImage());
-
     drawingPane = new DrawingPane(this);
     background = new Background(this);
     drawingArea = new DrawingArea(this);
@@ -149,48 +131,10 @@ public class PainToo {
         if (j.equals("")) menu.addSeparator();
         else {
           JMenuItem menuItem = new JMenuItem(j);
-          if (j.equals("Edit Colors")) {
-            menuItem.addActionListener(new ActionListener() {
-              public void actionPerformed(ActionEvent arg0) {
-                colorPicker = new ColorPicker(frame);
-              }
-            });
-          }
           menu.add(menuItem);
         }
       }
     }
-    
-    frame.addKeyListener(new KeyAdapter() {
-      public void keyReleased(KeyEvent e) {
-        int mod = e.getModifiers();
-        int key = e.getKeyCode();
-        shiftHeld = false;
-      }
-      public void keyPressed(KeyEvent e) {
-        int mod = e.getModifiers();
-        int key = e.getKeyCode();
-        if (key == 16) shiftHeld = true;
-        else shiftHeld = false;
-        if (key != 17 && key != 16) {
-          System.out.println("Key pressed: " + key + " - " + mod);
-          if (mod == 2) {
-            // '-' is pressed while holding ctrl
-            if (key == 45 || key == 109) {
-              drawingPane.decreaseBrushSize();
-            } else if (key == 61 || key == 107) {
-              drawingPane.increaseBrushSize();
-            } else if (key == 86) {
-              Image img = getImageFromClipboard();
-              if (img != null) drawingPane.pasteClipboard(img);
-            }
-          } else {
-            if (key == 66) changeTool(Tool.BRUSH);
-            else if (key == 71) changeTool(Tool.BUCKETFILL);
-          }
-        }
-      }
-    });
     
     frame.getContentPane().setLayout(new BorderLayout(0, 0));
     
@@ -206,24 +150,6 @@ public class PainToo {
     toolbarContainer.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Color.gray));
     frame.getContentPane().add(toolbarContainer, BorderLayout.WEST);
     
-    /*
-    JPanel layersContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 2, 2));
-    layersContainer.setBackground(new Color(240,240,240,255));
-    layersContainer.setPreferredSize(new Dimension(120,layersContainer.getHeight()));
-    layersContainer.setBorder(BorderFactory.createMatteBorder(1, 0, 1, 0, Color.gray));
-    frame.getContentPane().add(layersContainer, BorderLayout.EAST);
-    
-    JToolBar layersToolbar = new JWrapToolbar();
-    layersToolbar.setBackground(new Color(240,240,240,255));
-    //toolbar.setLayout(new WrapLayout(0, 0, 0));
-    layersToolbar.setSize(120,1);
-    layersToolbar.setRollover(true);
-    layersToolbar.setOrientation(SwingConstants.VERTICAL);
-    layersToolbar.setFloatable(true);
-    layersToolbar.setFocusable(false);
-    layersContainer.add(layersToolbar);
-    */
-    
     JToolBar toolbar = new JWrapToolbar();
     toolbar.setBackground(new Color(240,240,240,255));
     //toolbar.setLayout(new WrapLayout(0, 0, 0));
@@ -231,8 +157,8 @@ public class PainToo {
     toolbar.setRollover(true);
     toolbar.setOrientation(SwingConstants.VERTICAL);
     toolbar.setFloatable(false);
-    toolbar.setFocusable(false);
     toolbarContainer.add(toolbar);
+    toolbar.setFocusable(false);
     
     for (int i = 0;i < buttonArray.length;i++) {
       String text = buttonArray[i][0];
@@ -255,9 +181,7 @@ public class PainToo {
           button.setSelected(true);
           System.out.println(e.getActionCommand());
           if (e.getActionCommand().equals("Zoom")) changeTool(Tool.ZOOM);
-          else if (e.getActionCommand().equals("Bucket Fill")) changeTool(Tool.BUCKETFILL);
           else if (e.getActionCommand().equals("Brush")) changeTool(Tool.BRUSH);
-          else if (e.getActionCommand().equals("Pencil")) changeTool(Tool.PENCIL);
           else changeTool(null);
         }
       });
@@ -266,7 +190,7 @@ public class PainToo {
       buttons[i] = button;
     }
     
-    scrollPane = new JScrollPane();
+    JScrollPane scrollPane = new JScrollPane();
     scrollPane.setBorder(BorderFactory.createBevelBorder(1));
     //scrollPane.setBackground(new Color(171,171,171,255));
     scrollPane.getViewport().setOpaque(true);
@@ -275,7 +199,6 @@ public class PainToo {
     scrollPane.getVerticalScrollBar().setUnitIncrement(200);
     scrollPane.getHorizontalScrollBar().setUnitIncrement(200);
     frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
-    
     
     JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 2));
     //panel.setPreferredSize(new Dimension(640,480));
@@ -308,13 +231,6 @@ public class PainToo {
         drawingPane.setCursor(PaintCursor.Cursors.ZOOM);
         selectedTool = Tool.ZOOM;
       break;
-      case BUCKETFILL: 
-        drawingPane.setCursor(PaintCursor.Cursors.BUCKETFILL);
-        selectedTool = Tool.BUCKETFILL;
-      break;
-      case PENCIL: 
-        selectedTool = Tool.PENCIL;
-      break;
       default: 
         defaultTool = true; 
         defaultTool();
@@ -328,28 +244,6 @@ public class PainToo {
       btn.setFocusable(false);
     }
     buttons[selectedTool.ordinal()].setSelected(true);
-    drawingPane.clearPreview();
-    drawingPane.previewPixel();
-  }
-  
-  public Image getImageFromClipboard() {
-    System.out.println("Getting Clipboard...");
-    Transferable transferable = Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
-    if (transferable != null && transferable.isDataFlavorSupported(DataFlavor.imageFlavor)) {
-      try {
-        return (Image) transferable.getTransferData(DataFlavor.imageFlavor);
-      } catch (UnsupportedFlavorException e) {
-        // handle this as desired
-        e.printStackTrace();
-      }
-      catch (IOException e) {
-        // handle this as desired
-        e.printStackTrace();
-      }
-    } else {
-      System.err.println("getImageFromClipboard: That wasn't an image!");
-    }
-    return null;
   }
   
   public Tool getTool() {

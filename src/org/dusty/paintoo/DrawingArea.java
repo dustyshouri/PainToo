@@ -25,6 +25,38 @@ public class DrawingArea extends Layer {
     super(paint);
     this.isDrawingArea = true;
 
+    /*
+    addMouseListener(new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        if (paint.getTool() == Tool.ZOOM) {
+          paint.defaultTool();
+        } else {
+          int mx = e.getX()/zoomScale;
+          int my = e.getY()/zoomScale;
+          if (graphics != null) {
+            drawLine(mx,my,mx,my);
+          }
+          oldX = mx;
+          oldY = my;
+        }
+      }
+    });
+
+    addMouseMotionListener(new MouseMotionAdapter() {
+      public void mouseDragged(MouseEvent e) {
+        if (paint.getTool() != Tool.ZOOM) {
+          newX = e.getX()/zoomScale;
+          newY = e.getY()/zoomScale;
+
+          if (graphics != null) {
+            drawLine(oldX, oldY, newX, newY);
+            oldX = newX;
+            oldY = newY;
+          }
+        }
+      }
+    });
+    */
     
     super.setPreferredSize(dimension);
   }
